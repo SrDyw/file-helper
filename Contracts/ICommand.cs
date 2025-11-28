@@ -1,5 +1,8 @@
+using System.CommandLine;
+
 namespace fh.Contracts;
 
-public interface IComand {
-    void Setup();
+public interface ICommand
+{
+    Command Setup();
 }

@@ -1,10 +1,24 @@
 using fh.Contracts;
+using System.CommandLine;
+using fh.CommandOptions;
+using fh.Utils.Commands;
 
 namespace fh.Commands.Greeting;
-class GreetingCommand : IComand
+
+[Command]
+class GreetingCommand : ICommand
 {
-    public void Setup()
+    protected Command Command { get; set; }
+    public GreetingCommand()
     {
-        throw new NotImplementedException();
+        Command = new Command("greetings", "Command to greet the user");
+    }
+
+    public Command Setup()
+    {
+        Command.AddNameOption(name => {
+            Console.WriteLine("Hello " + name);
+        });
+        return Command;
     }
 }

@@ -1,27 +1,19 @@
 ﻿using System.CommandLine;
+using fh.Commands.Greeting;
+using System.Reflection;
 
-var rootCommand = new RootCommand("Test");
+var rootCommand = new RootCommand("File Helper");
 
-Option<string> nameOption = new("--name")
+var types = Assembly.GetExecutingAssembly().GetTypes();
+var commands = types
+    .Where(x => x.GetCustomAttribute<CommandAttribute>() != null)
+    .Select(x =>  System.Activator.CreateInstance(x) as fh.Contracts.ICommand);
+
+foreach (var command in commands)
 {
-    Description = "Name to display on console"
-};
+    if (command == null) continue;
+    rootCommand.Subcommands.Add(command.Setup());
+}
 
-
-var greetingCommand = new Command("greeting", description: "Greet the user")
-{
-    nameOption
-};
-
-rootCommand.Subcommands.Add(greetingCommand);
-ParseResult parseResult = rootCommand.Parse(args);
-
-greetingCommand.SetAction(parseResult =>
-{
-    string? n = parseResult.GetValue(nameOption);
-    Console.WriteLine("Hello " + n);
-    return 0;
-});
-
-ParseResult pr = rootCommand.Parse(args);
+var parseResult = rootCommand.Parse(args);
 return parseResult.Invoke();
