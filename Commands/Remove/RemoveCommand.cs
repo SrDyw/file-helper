@@ -29,8 +29,18 @@ public class RemoveCommand : ICommand
             }
             try
             {
-                Directory.Delete(Path.Combine(currentDir, name), recursive);
-                Console.WriteLine($"Directory {name} removed successfully");
+                var isFile = name.Split('.').Length > 1;
+
+                if (isFile)
+                {
+                    File.Delete(name);
+                    Console.WriteLine($"File {name} removed successfully");
+                }
+                else
+                {
+                    Directory.Delete(Path.Combine(currentDir, name), recursive);
+                    Console.WriteLine($"Directory {name} removed successfully");
+                }
             }
             catch (DirectoryNotFoundException)
             {
