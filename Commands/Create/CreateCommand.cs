@@ -28,23 +28,28 @@ public class CreateCommand : ICommand
             var requestPath = name.Split('/');
             var folders = requestPath.Length > 1 ? requestPath.SkipLast(1) : new string[] { };
             var file = requestPath[^1];
+            var isFile = file.Split('.').Length > 1;
 
             StringBuilder sb = new(currentDir);
 
             foreach (var f in folders)
             {
                 sb.Append($"/{f}");
-                CreateFolder(name: f, path: sb.ToString());
+                CreateFolder(path: sb.ToString());
             }
-
-            var fileType = string.IsNullOrEmpty(type) ? "" : $".{type}";
-            File.WriteAllText(Path.Combine(sb.ToString(), $"{file}{fileType}"), "");
+            if (isFile)
+            {
+                var fileType = string.IsNullOrEmpty(type) ? "" : $".{type}";
+                File.WriteAllText(Path.Combine(sb.ToString(), $"{file}{fileType}"), "");
+                return;
+            }
+            CreateFolder(path: Path.Combine(sb.ToString(), file));
         }, CommonOptions.Name, CommonOptions.Type);
 
         return Command;
     }
 
-    private void CreateFolder(string name, string path)
+    private void CreateFolder(string path)
     {
         if (!Directory.Exists(path))
         {
