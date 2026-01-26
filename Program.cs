@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
 using fh.Commands.Greeting;
 using System.Reflection;
+using System.Globalization;
+
 
 var rootCommand = new RootCommand("File Helper");
 
