@@ -7,6 +7,10 @@ public static class CommonOptions
     {
         Description = "Name to display"
     };
+    public static Option<string> Path = new("--path", "-p")
+    {
+        Description = "Target path"
+    };
 
     public static Option<string> Type = new("--type", "-t")
     {
@@ -17,4 +21,5 @@ public static class CommonOptions
     {
         Description = "Execute the action for all elements tree"
     };
+
 }

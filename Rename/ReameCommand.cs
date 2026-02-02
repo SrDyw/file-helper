@@ -14,60 +14,69 @@ public class RenameCommand : ICommand
     }
     public Command Setup()
     {
-        Command.SetOptions(parsedResult =>
+        Command.SetOptions((Action<ParseResult>)(parsedResult =>
         {
-            var targetFile = parsedResult.GetValue(RenameOptions.File);
-            var template = parsedResult.GetValue(RenameOptions.Template);
-            var startWith = parsedResult.GetValue(RenameOptions.StartWith);
+            var path = parsedResult.GetValue(CommonOptions.Path);
+            var with = parsedResult.GetValue(RenameOptions.With);
+            var to = parsedResult.GetValue(RenameOptions.To);
+            var removeParams = parsedResult.GetValue(RenameOptions.RemoveParams);
 
-            Console.WriteLine($"[TEMPLATE] {template}");
-            Console.WriteLine($"Renaming file {targetFile}");
-
-            if (string.IsNullOrWhiteSpace(targetFile))
+            if (string.IsNullOrWhiteSpace(path))
             {
-                targetFile = Directory.GetCurrentDirectory();
+                path = Directory.GetCurrentDirectory();
+            }
+            if (!Directory.Exists(path))
+            {
+                Console.WriteLine($"[ERROR] Couldn't find the path {path}");
+                return;
+            }
+            Console.WriteLine($"======== Renaming files at {path} ============");
+
+            if (string.IsNullOrEmpty(with))
+            {
+                with = "y2save.com";
             }
 
-            if (string.IsNullOrEmpty(startWith))
+            if (string.IsNullOrWhiteSpace(removeParams))
             {
-                startWith = "y2save.com";
+                removeParams = with;
             }
 
-            Console.WriteLine($"[StartWith] {startWith}");
+            if (string.IsNullOrWhiteSpace(to)) to = " ";
 
-            if (template == "y2save")
-            {
-                Y2TemplateRename(targetFile, startWith);
-            }
+            Console.WriteLine($"[StartWith] {with}");
+            Console.WriteLine($"[REMOVING] {removeParams}");
 
-
-        }, RenameOptions.File, RenameOptions.Template, RenameOptions.StartWith);
+            Rename(path, with, to, removeParams.Split(","));
+        }), CommonOptions.Path, RenameOptions.RemoveParams, RenameOptions.With, RenameOptions.To);
 
         return Command;
     }
 
-    public void Rename(string? path, string? template)
-    {
-
-    }
-
-    public void Y2TemplateRename(string path, string startWith)
+    public void Rename(string path, string with, string to, params string[] removeParams)
     {
         string[] files = Directory.GetFiles(path);
-        IEnumerable<string> y2files = files.Where(x => x.Split("\\").Any(x => x.StartsWith(startWith)));
+        IEnumerable<string> selectedFiles = files.Where(x => Path.GetFileName(x).Contains(with));
 
         if (Path.Exists(path))
         {
-            foreach (var item in y2files)
+            if (selectedFiles.Any() == false)
+            {
+                Console.WriteLine("[WARNING] No files detected with specified params");
+                return;
+            }
+            foreach (var item in selectedFiles)
             {
                 string extension = Path.GetExtension(item);
                 string fileName = Path.GetFileName(item);
-                string targetName = fileName
-                    .Replace("-", " ")
-                    .Replace(startWith, "")
-                    .Trim();
+                string targetName = fileName;
 
-                string targetPath = Path.Combine(path, $"{targetName}");
+                foreach (var param in removeParams)
+                {
+                    targetName = targetName.Replace(param, to);
+                }
+
+                string targetPath = Path.Combine(path, $"{targetName.Trim()}");
 
                 Console.WriteLine($"[RENAME] {fileName} -> {targetName}");
                 File.Move(item, targetPath);
