@@ -34,7 +34,8 @@ public class RenameCommand : ICommand
 
             if (string.IsNullOrEmpty(with))
             {
-                with = "y2save.com";
+                Console.WriteLine("[ERROR] With params is required");
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(removeParams))
