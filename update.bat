@@ -6,7 +6,7 @@ echo Packing...
 dotnet pack ./fh.csproj
 
 echo Installing...
-dotnet tool install -g FH --add-source ./nupkg
+dotnet tool install -g FH --add-source ./nupkg --ignore-failed-sources
 
 if %errorlevel% equ 0 (
     echo Update successfully!
